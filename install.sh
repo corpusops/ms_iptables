@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -ex
 cd $(dirname $0)
 config=${config:-ms_iptables.d/lock.json}
 bin=ms_iptables.py
@@ -30,5 +31,7 @@ fi
 
 if [[ -n $changed ]];then
     echo "changed=true"
+else
+    echo "changed=false"
 fi
 # vim:set et sts=4 ts=4 tw=80:
