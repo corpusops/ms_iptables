@@ -1,0 +1,7 @@
+- To install:
+    - Place the python script `ms_iptables.py` inside /usr/bin/
+    - Either place the init script inside /etc/init.d or use the systemd unit file
+    - Place json files either inside:
+        - /etc/ms_iptables.d/ (any .json will be picked up)
+        - /etc/ms_iptables.json
+- You can also try the simple [`install.sh`](../install.sh) installer

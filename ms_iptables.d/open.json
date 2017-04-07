@@ -1,0 +1,12 @@
+{
+    "load_default_rules": true,
+    "load_default_flush_rules": true,
+    "load_default_open_policies": true,
+    "load_default_hard_policies": true,
+    "rules": [],
+    "policy": "open",
+    "ipv6": true,
+    "hard_policies": [],
+    "open_policies": [],
+    "flush_rules": []
+}
