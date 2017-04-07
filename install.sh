@@ -15,6 +15,9 @@ if [ -e /etc/init.d ];then
         changed=1
     fi
 fi
+if [ -e /etc/init.d/ms_iptables ];then
+    chmod +x /etc/init.d/ms_iptables
+fi
 if [ -e /etc/systemd/system ];then
     if [[ ! -e /etc/systemd/system/ms_iptables.service ]] || ! diff -q "systemd/ms_iptables.service" "/etc/systemd/system/ms_iptables.service";then
         cp -fv "systemd/ms_iptables.service" "/etc/systemd/system/ms_iptables.service"
