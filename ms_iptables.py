@@ -291,7 +291,7 @@ appliedrule_re = re.compile(
     '(-w\s+)?'
     '(-t\s+(?P<table>(filter|nat|mangle))\s+)?'
     '(?P<action>-I|-A)\s+'
-    '(?P<chain>OUTPUT|INPUT|FORWARD|POSTROUTING|PREROUTING)\s+'
+    '(?P<chain>OUTPUT|INPUT|FORWARD|POSTROUTING|PREROUTING|[^\s]+)\s+'
     '((?P<index>[0-9]+)\s+)?'
     '(?P<rule>.*$)',
     flags=re_flags)
@@ -300,7 +300,7 @@ policyrule_re = re.compile(
     '(-w\s+)?'
     '(-t\s+(?P<table>(filter|nat|mangle))\s+)?'
     '(?P<switch>-P)\s+'
-    '(?P<chain>OUTPUT|INPUT|FORWARD|POSTROUTING|PREROUTING)\s+'
+    '(?P<chain>OUTPUT|INPUT|FORWARD|POSTROUTING|PREROUTING|[^\s]+)\s+'
     '(?P<policy>ACCEPT|REJECT|DROP)',
     flags=re_flags)
 policyout_re = re.compile(' (?P<policy>ACCEPT|DROP|REJECT)\)')
