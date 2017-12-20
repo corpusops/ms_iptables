@@ -3,6 +3,8 @@
 # Provides:          ms_iptables
 # Required-Start:    $remote_fs
 # Required-Stop:     $remote_fs
+# Should-Start:      libvirtd NetworkManager lxc-net-makina lxc-net docker-net-makina docker-net docker openvpn
+# Should-Stop:       libvirtd NetworkManager lxc-net-makina lxc-net docker-net-makina docker-net docker openvpn
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: iptables firewall
