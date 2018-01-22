@@ -15,6 +15,28 @@
 # Author: Mathieu Le Marec - Pasquet <kiorky@cryptelium.net>
 #
 
+
+RUN_TEST=/run/ms_iptables_loaded
+
+has_command() {
+    ret=1
+    if which which >/dev/null 2>/dev/null;then
+      if which "${@}" >/dev/null 2>/dev/null;then
+        ret=0
+      fi
+    else
+      if command -v "${@}" >/dev/null 2>/dev/null;then
+        ret=0
+      else
+        if hash -r "${@}" >/dev/null 2>/dev/null;then
+            ret=0
+        fi
+      fi
+    fi
+    return ${ret}
+}
+
+
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="dynamic firewall daemon (iptables)"
 NAME=ms_iptables
@@ -33,24 +55,45 @@ if [  -f "/etc/default/$NAME" ];then . "/etc/default/$NAME";fi
 # Define LSB log_* functions.
 . /lib/lsb/init-functions
 
+
+
+ensure_drtdir()
+{
+    drtdir=$(dirname "$RUN_TEST")
+    if [ ! -e "$drtdir" ];then
+        mkdir -p "$drtdir"
+    fi
+}
+
 do_stop()
 {
+    ret=0
     if [ "x${MS_IPTABLES_DISABLED}" = "x" ];then
         "${DAEMON}" --stop
+        ret=$?
+        if [ "x${ret}" = "x0" ] && [ -e "$RUN_TEST" ];then
+            rm -f "$RUN_TEST"
+        fi
     else
         echo "$0: ms_iptables is disabled"
     fi
-    return $?
+    return $ret
 }
 
 do_start()
 {
+    ret=0
     if [ "x${MS_IPTABLES_DISABLED}" = "x" ];then
         "${DAEMON}"
+        ret=$?
+        if [ "x${ret}" = "x0" ];then
+            ensure_drtdir
+            touch "$RUN_TEST"
+        fi
     else
         echo "$0: ms_iptables is disabled"
     fi
-    return $?
+    return $ret
 }
 
 do_reload()
@@ -67,29 +110,38 @@ do_reload()
 
 case "$1" in
   start)
-    log_daemon_msg "Starting $DESC" "$NAME"
-    do_start
-    log_end_msg $?
-    ;;
+      log_daemon_msg "Starting $DESC" "$NAME"
+      do_start
+      log_end_msg $?
+      ;;
   stop)
-    log_daemon_msg "Stopping $DESC" "$NAME"
-    do_stop
-    log_end_msg $?
-    ;;
+      log_daemon_msg "Stopping $DESC" "$NAME"
+      do_stop
+      log_end_msg $?
+      ;;
   reload|force-reload)
-    log_daemon_msg "Reloading $DESC" "$NAME"
-    do_reload
-    log_end_msg $?
-    ;;
+      log_daemon_msg "Reloading $DESC" "$NAME"
+      do_reload
+      log_end_msg $?
+      ;;
   restart)
-    "$0" stop
-    "$0" start
-    ;;
+      "$0" stop
+      "$0" start
+      ;;
   status)
-    exit 0
-    ;;
+      if ( has_command systemctl && systemctl is-system-running | egrep -q "unknown|offline|initializing"; );then
+          ret=$(systemctl status ms_iptables 1>/dev/null 2>&1 && echo $?; )
+      else
+          if [ -e "$RUN_TEST" ];then
+              ret=0
+          else
+              ret=3
+          fi
+      fi
+      exit $ret
+      ;;
   *)
-    echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload|reload|status}" >&2
-    exit 3
-    ;;
+      echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload|reload|status}" >&2
+      exit 3
+      ;;
 esac
