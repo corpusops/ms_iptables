@@ -476,6 +476,8 @@ def remove_rule(raw_rule, config):
         to_apply = False
     if not to_apply:
         return ret
+    if not isinstance(raw_rule, six.string_types):
+        return ret
     pobj = policyrule_re.search(rule)
     robj = appliedrule_re.search(rule)
     drule = None
