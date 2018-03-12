@@ -376,6 +376,14 @@ def validate_and_complete(vopts, config):
     return config
 
 
+def natural_sort(l):
+    convert = lambda text: (  # noqa
+        int(text) if text.isdigit() else text.lower())  # noqa
+    alphanum_key = (lambda key: [convert(c)
+                                 for c in re.split('([0-9]+)', key)])
+    return sorted(l, key=alphanum_key)
+
+
 def load_configs(vopts, config=None, use_cache=True):
     if (
         use_cache and
@@ -384,11 +392,14 @@ def load_configs(vopts, config=None, use_cache=True):
 
     ):
         vopts['config'].insert(0, vopts['state_file'])
+    cfgs = []
     for fcfgdir in vopts['config_dir']:
         if os.path.exists(fcfgdir):
-            for cfg in sorted(glob.glob('{0}/*.json'.format(fcfgdir))):
+            for cfg in natural_sort(glob.glob('{0}/*.json'.format(fcfgdir))):
                 if cfg not in vopts['config']:
-                    vopts['config'].append(cfg)
+                    cfgs.append(cfg)
+    cfgs.reverse()
+    vopts['config'].extend(cfgs)
     invalid_cfgs = []
     for fcfg in vopts['config']:
         try:
