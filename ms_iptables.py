@@ -287,21 +287,28 @@ RULES_AND_POLICIES = ['rules', 'flush_rules',
 FLAGS = ['ipv6', 'load_default_open_policies', 'load_default_rules',
          'load_default_hard_policies', 'load_default_flush_rules']
 appliedrule_re = re.compile(
+    '(?P<pre>'
     '(?P<binary>ip6?tables)\s+'
-    '(-w\s+)?'
-    '(-t\s+(?P<table>(raw|filter|nat|mangle))\s+)?'
+    '(?P<write>-w\s+)?'
+    '(?P<stable>-t\s+(?P<table>(raw|filter|nat|mangle))\s+)?'
+    ')'
     '(?P<action>-I|-A)\s+'
+    '(?P<frule>'
     '(?P<chain>OUTPUT|INPUT|FORWARD|POSTROUTING|PREROUTING|[^\s]+)\s+'
     '((?P<index>[0-9]+)\s+)?'
-    '(?P<rule>.*$)',
+    '(?P<rule>.*$))',
     flags=re_flags)
 policyrule_re = re.compile(
+    '(?P<pre>'
     '(?P<binary>ip6?tables)\s+'
     '(-w\s+)?'
     '(-t\s+(?P<table>(raw|filter|nat|mangle))\s+)?'
+    ')'
+    '(?P<frule>'
     '(?P<switch>-P)\s+'
     '(?P<chain>OUTPUT|INPUT|FORWARD|POSTROUTING|PREROUTING|[^\s]+)\s+'
-    '(?P<policy>ACCEPT|REJECT|DROP)',
+    '(?P<policy>ACCEPT|REJECT|DROP)'
+    ')',
     flags=re_flags)
 policyout_re = re.compile(' (?P<policy>ACCEPT|DROP|REJECT)\)')
 comment_re = re.compile('^(#|: )')
@@ -437,6 +444,7 @@ def apply_rule(raw_rule, config):
     if not to_apply:
         return ret
     pobj = policyrule_re.search(rule)
+    sobj = appliedrule_re.search(rule)
     if pobj:
         pgroups = pobj.groupdict()
         table = pgroups['table']
@@ -459,8 +467,9 @@ def apply_rule(raw_rule, config):
         if policy == pgroups['policy']:
             to_apply = False
             log.info('{0} policy already applied'.format(rule.encode('ascii')))
-    elif appliedrule_re.search(rule):
-        crule = appliedrule_re.sub('\g<binary> -C  \g<chain> \g<rule>', rule)
+    elif sobj:
+        groups = sobj.groupdict()
+        crule = "{pre} -C {chain} {rule}".format(**groups)
         p = popen(crule, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         cret = p.wait()
         if cret:
@@ -576,7 +585,7 @@ def flush_fw(config, errors=None, changes=None):
         changes = []
     log.info('Flushing the firewall')
     for r in config['flush_rules']:
-        if comment_re.search(r):
+        if comment_re.match(r):
             log_comment(r)
         else:
             report(r, apply_rule(r, config), errors, changes)
@@ -602,7 +611,7 @@ def remove_rules(config, errors=None, changes=None):
         changes = []
     log.info('Removing rules from firewall')
     for r in config['rules']:
-        if comment_re.search(r):
+        if comment_re.match(r):
             log_comment(r)
         else:
             report(r, remove_rule(r, config), errors, changes)
@@ -616,7 +625,7 @@ def apply_rules(config, errors=None, changes=None):
         changes = []
     log.info('Applying rules to firewall')
     for r in config['rules']:
-        if comment_re.search(r):
+        if comment_re.match(r):
             log_comment(r)
         else:
             report(r, apply_rule(r, config), errors, changes)
@@ -630,7 +639,7 @@ def cleanup_old_rules(cache_config, config, errors=None, changes=None):
     if changes is None:
         changes = []
     for r in cache_config['rules']:
-        if comment_re.search(r):
+        if comment_re.match(r):
             log_comment(r)
         elif r not in config['rules']:
             report(r, remove_rule(r, config), errors, changes)
