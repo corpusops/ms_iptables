@@ -217,7 +217,7 @@ DEFAULT_FIREWALL = {
         'iptables  -w -t nat    -P POSTROUTING ACCEPT',
         'ip6tables -w -t filter -P INPUT       DROP',
         'ip6tables -w -t filter -P OUTPUT      ACCEPT',
-        'ip6tables -w -t filter -P FORWARD     ACCEPT',
+        'ip6tables -w -t filter -P FORWARD     DROP',
         'ip6tables -w -t mangle -P PREROUTING  ACCEPT',
         'ip6tables -w -t mangle -P INPUT       ACCEPT',
         'ip6tables -w -t mangle -P FORWARD     ACCEPT',
