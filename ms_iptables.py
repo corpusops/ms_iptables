@@ -273,6 +273,7 @@ DEFAULT_FIREWALL = {
         'ip6tables -w -t filter -I  INPUT 1 -i lo -j ACCEPT',
         'ip6tables -w -t filter -I  INPUT 1 -p icmp -j ACCEPT',
         'ip6tables -w -t filter -I  INPUT 1 -p icmpv6 -j ACCEPT',
+        'ip6tables -w -t filter -I  INPUT -m state --state NEW -m udp -p udp --dport 546 -d fe80::/64 -j ACCEPT',
         'ip6tables -w -t filter -I  INPUT 1 -p tcp --dport 22  -j ACCEPT',
         'ip6tables -w -t filter -I  INPUT 1 -p tcp --dport 80  -j ACCEPT',
         'ip6tables -w -t filter -I  INPUT 1 -p tcp --dport 443 -j ACCEPT',
