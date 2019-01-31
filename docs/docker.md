@@ -18,7 +18,7 @@
             environment:
                 SUBNET: 192.168.3.0
                 OUTNIP: 1.2.3.4
-            image: corpusops/msiptables
+            image: corpusops/ms_iptables
             cap_add: [NET_ADMIN]
             network_mode: "host"
             volumes:
