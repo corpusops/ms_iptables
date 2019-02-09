@@ -346,11 +346,16 @@ def load_config(fcfg, merged_config=None):
                 ' * '.join(error_msgs)))
     if merged_config:
         for section, val in six.iteritems(merged_config):
+            done = False
             if section in FLAGS and section not in config:
                 config[section] = val
-            config.setdefault(section, [])
+                done = True
             if section in RULES_AND_POLICIES:
+                config.setdefault(section, [])
                 config[section].extend(val[:])
+                done = True
+            if not done:
+                config.setdefault(section, val)
     return config
 
 
