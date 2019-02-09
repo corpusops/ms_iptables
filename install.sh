@@ -32,6 +32,17 @@ if [[ ! -e /etc/ms_iptables.json ]] || [ ! -e /etc/ms_iptables.json ];then
     changed=1
 fi
 
+is_container_() {
+    echo  "$(cat -e /proc/1/environ |grep container=|wc -l|sed -e "s/ //g")"
+}
+is_container() { [ "x$(is_container_)" != "x0" ]; }
+
+# in lxc, dont put firewall in hard mode
+if diff -q "$config" /etc/ms_iptables.json && (is_container) && grep -q '"hard"' /etc/ms_iptables.json;then
+    sed -i -re 's/"hard"/"open"/g' /etc/ms_iptables.json
+    changed=1
+fi
+
 if [[ -n $changed ]];then
     echo "changed=true"
 else
