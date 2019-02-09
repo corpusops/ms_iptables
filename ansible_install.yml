@@ -1,0 +1,30 @@
+- hosts: all
+  vars:
+    ms_iptables_dest: "/srv/apps/ms_iptables"
+    sshargs: >-
+      {% if (
+          hostvars[inventory_hostname].ansible_connection|default('ssh')
+         ) not in [ 'smart', 'local'] %}
+      {{ hostvars[inventory_hostname].ssh_args | default('') }}
+      {{ hostvars[inventory_hostname].ansible_ssh_args | default('') }}
+      {{ hostvars[inventory_hostname].ansible_ssh_common_args | default('') }}
+      {{ hostvars[inventory_hostname].ansible_ssh_extra_args | default('') }}
+      {% endif %}
+  tasks:
+  - file:
+      state: directory
+      path: "{{ms_iptables_dest}}"
+  - synchronize:
+      ssh_args: "{{sshargs}}"
+      rsync_opts: ["-azv"]
+      src: ./
+      compress: false
+      dest: "{{ms_iptables_dest}}"
+      mode: push
+    delegate_to: localhost
+  - shell: |
+      set -ex
+      cd "{{ms_iptables_dest}}"
+      git pull --rebase && ./install.sh
+    register: t
+    changed_when: "'changed=true' in t.stdout"
