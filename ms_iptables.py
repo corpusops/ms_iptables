@@ -466,7 +466,7 @@ def apply_rule(raw_rule, config):
         if pret:
             policy = None
         else:
-            out = pout.stdout.read().strip()
+            out = pout.stdout.read().decode('utf-8', 'ignore').strip()
             policy = policyout_re.search(out)
             if policy:
                 policy = policy.groupdict()['policy']
@@ -524,7 +524,7 @@ def remove_rule(raw_rule, config):
         if pret:
             policy = None
         else:
-            out = pout.stdout.read().strip()
+            out = pout.stdout.read().decode('utf-8', 'ignore').strip()
             policy = policyout_re.search(out)
             policy = policy.groupdict()['policy']
         if policy == 'ACCEPT':
