@@ -2,7 +2,7 @@
 Description=ms iptables
 After=network.target
 Before=libvirtd.service
-Before=NetworkManager.service
+After=NetworkManager.service
 Before=lxc-net-makina.service
 Before=lxc-net.service
 Before=docker-net-makina.service
